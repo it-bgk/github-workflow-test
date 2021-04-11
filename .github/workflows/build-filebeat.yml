@@ -3,6 +3,7 @@ on:
   schedule:
     - cron:  '0 0 * * *'
   workflow_dispatch:
+  push:
 env:
   MY_DOCKER_REPO: ${{ secrets.DOCKERHUB_ORG }}/filebeat
   MY_QUAY_REPO: ${{ secrets.QUAY_ORG }}/filebeat
