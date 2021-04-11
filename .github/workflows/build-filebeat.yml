@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         VERSION: [7.12.0]
-        CONFIG_FILE: [filebeat_config_console.yml,filebeat_config_file.yml,filebeat_config_logstash.yml]
+        CONFIG_FILE: [console,file,logstash]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -21,10 +21,7 @@ jobs:
       #   id: git-sha
       #   run: echo "EXT_GIT_REF_SHA1=$(git rev-parse HEAD)" >> $GITHUB_ENV
       - name: Build
-        run: |
-          docker ps
-          ls -la
-          git remote -v
+        run: make build-filebeat-${{ env.CONFIG_FILE }}
       # - name: Kaniko build
       #   uses: aevea/action-kaniko@master
       #   with:
