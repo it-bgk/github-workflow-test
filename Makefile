@@ -3,6 +3,11 @@
 help:
 	@echo "Please use one of the subcommands via TAB"
 
+dev-build-filebeat-%:
+	${MAKE} -C filebeat dev-build-filebeat-$*
+dev-push-filebeat-%:
+	${MAKE} -C filebeat dev-push-filebeat-$*
+
 build-filebeat-%:
 	${MAKE} -C filebeat build-filebeat-$*
 push-filebeat-%:

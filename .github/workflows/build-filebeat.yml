@@ -22,7 +22,7 @@ jobs:
         id: git-sha
         run: echo "EXT_GIT_REF_SHA1=$(git rev-parse HEAD)" >> $GITHUB_ENV
       - name: Build
-        run: make dev-build-filebeat-${{ matrix.CONFIG_FILE }}
+        run: make VERSION=${{ matrix.VERSION }} dev-build-filebeat-${{ matrix.CONFIG_FILE }}
       
       - name: hub.docker.com login
         run: echo ${{ secrets.DOCKER_PASSWORD }}| docker login -u ${{ secrets.DOCKER_USERNAME }}
@@ -30,9 +30,9 @@ jobs:
         run: echo ${{ secrets.QUAY_PASSWORD }}| docker login -u ${{ secrets.QUAY_USERNAME }} quay.io
       
       - name: "Push filbeat:${{ matrix.VERSION }}-${{ matrix.CONFIG_FILE }}"
-        run: make dev-push-filebeat-${{ matrix.CONFIG_FILE }}
+        run: make VERSION=${{ matrix.VERSION }} dev-push-filebeat-${{ matrix.CONFIG_FILE }}
       # - name: "Push filbeat:latest-${{ matrix.CONFIG_FILE }}"
-      #   run: make dev-push-filebeat-latest-${{ matrix.CONFIG_FILE }}
+      #   run: make VERSION=${{ matrix.VERSION }} dev-push-filebeat-latest-${{ matrix.CONFIG_FILE }}
   prod:
     strategy:
       matrix:
@@ -45,7 +45,7 @@ jobs:
         id: git-sha
         run: echo "EXT_GIT_REF_SHA1=$(git rev-parse HEAD)" >> $GITHUB_ENV
       - name: Build
-        run: make build-filebeat-${{ matrix.CONFIG_FILE }}
+        run: make VERSION=${{ matrix.VERSION }} build-filebeat-${{ matrix.CONFIG_FILE }}
       
       - name: hub.docker.com login
         run: echo ${{ secrets.DOCKER_PASSWORD }}| docker login -u ${{ secrets.DOCKER_USERNAME }}
@@ -55,8 +55,8 @@ jobs:
         if: ${{ github.ref == 'refs/heads/main' }}
       
       - name: "Push filbeat:${{ matrix.VERSION }}-${{ matrix.CONFIG_FILE }}"
-        run: make push-filebeat-${{ matrix.CONFIG_FILE }}
+        run: make VERSION=${{ matrix.VERSION }} push-filebeat-${{ matrix.CONFIG_FILE }}
         if: ${{ github.ref == 'refs/heads/main' }}
       - name: "Push filbeat:latest-${{ matrix.CONFIG_FILE }}"
-        run: make push-filebeat-latest-${{ matrix.CONFIG_FILE }}
+        run: make VERSION=${{ matrix.VERSION }} push-filebeat-latest-${{ matrix.CONFIG_FILE }}
         if: ${{ github.ref == 'refs/heads/main' }}
