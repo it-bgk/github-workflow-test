@@ -21,7 +21,7 @@ jobs:
       #   id: git-sha
       #   run: echo "EXT_GIT_REF_SHA1=$(git rev-parse HEAD)" >> $GITHUB_ENV
       - name: Build
-        run: make build-filebeat-${{ env.CONFIG_FILE }}
+        run: make build-filebeat-${{ matrix.CONFIG_FILE }}
       # - name: Kaniko build
       #   uses: aevea/action-kaniko@master
       #   with:
