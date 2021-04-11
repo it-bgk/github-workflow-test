@@ -21,7 +21,6 @@ jobs:
       #   id: git-sha
       #   run: echo "EXT_GIT_REF_SHA1=$(git rev-parse HEAD)" >> $GITHUB_ENV
       - name: Build
-        uses: docker:dind
         run: |
           docker ps
           ls -la
