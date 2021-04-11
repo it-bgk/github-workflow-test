@@ -23,6 +23,14 @@ jobs:
       #   run: echo "EXT_GIT_REF_SHA1=$(git rev-parse HEAD)" >> $GITHUB_ENV
       - name: Build
         run: make build-filebeat-${{ matrix.CONFIG_FILE }}
+      - name: "Push filbeat:VERSION-CONFIG_FILE"
+        run: make push-filebeat-${{ matrix.CONFIG_FILE }}
+      - name: "Push filbeat:latest-CONFIG_FILE"
+        run: make push-filebeat-latest-${{ matrix.CONFIG_FILE }}
+      # - name: "Push filbeat:latest"
+      #   run: make push-filebeat-latest
+      #   if:
+
       # - name: Kaniko build
       #   uses: aevea/action-kaniko@master
       #   with:

@@ -5,6 +5,8 @@ help:
 
 build-filebeat-%:
 	${MAKE} -C filebeat build-filebeat-$*
+push-filebeat-%:
+	${MAKE} -C filebeat push-filebeat-$*
 test-filebeat:
 	cd filebeat; docker-compose up -d; docker-compose logs -f
 clean-filbeat:
