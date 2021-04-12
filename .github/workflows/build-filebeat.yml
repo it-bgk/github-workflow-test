@@ -10,7 +10,7 @@ env:
   MY_DOCKER_CONTEXT: ./filebat
   MY_DOCKER_DOCKERFILE: Dockerfile
 jobs:
-  dev:
+  main:
     strategy:
       matrix:
         VERSION: [7.12.0]
@@ -22,7 +22,7 @@ jobs:
         id: git-sha
         run: echo "EXT_GIT_REF_SHA1=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-      - name: Docker meta
+      - name: Setup Docker metadata for dev
         id: meta
         # https://github.com/crazy-max/ghaction-docker-meta
         uses: crazy-max/ghaction-docker-meta@v2
@@ -41,51 +41,8 @@ jobs:
             type=raw,value=latest-${{matrix.CONFIG_FILE}}
             type=raw,value=${{matrix.VERSION}}-${{matrix.CONFIG_FILE}}-${{env.EXT_GIT_REF_SHA1}}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: hub.docker.com login
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-        if: ${{ github.ref == 'refs/heads/dev' }}
-      - name: quay.io login
-        uses: docker/login-action@v1
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
-        if: ${{ github.ref == 'refs/heads/dev' }}
-
-      - name: Build dev docker container and push it as dev container if it is part of a pull_request
-        uses: docker/build-push-action@v2
-        with:
-          context: filebeat/
-          push: ${{ github.event_name == 'pull_request' }}
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            VERSION=${{matrix.VERSION}}
-            CONFIG_FILE=filebeat_config_${{matrix.CONFIG_FILE}}.yml
-  
-  prod:
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/tags'}}
-    strategy:
-      matrix:
-        VERSION: [7.12.0]
-        CONFIG_FILE: [console,file,logstash]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Output git ref sha1
-        id: git-sha
-        run: echo "EXT_GIT_REF_SHA1=$(git rev-parse HEAD)" >> $GITHUB_ENV
-
-      - name: Docker meta
+      - name: Setup Docker metadata for prod
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/tags'}}
         id: meta
         uses: crazy-max/ghaction-docker-meta@v2
         with:
@@ -112,20 +69,20 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/tags' }}
       - name: quay.io login
         uses: docker/login-action@v1
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/tags' }}
 
-      - name: Build docker container and if it is main push it
+      - name: Build dev docker container and push it as dev container if it is part of a pull_request
         uses: docker/build-push-action@v2
         with:
           context: filebeat/
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/tags' }}
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
