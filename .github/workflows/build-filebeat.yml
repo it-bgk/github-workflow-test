@@ -10,7 +10,7 @@ on:
       - 'v*'
   pull_request:
     branches:
-      - 'main'
+      # - 'main'
       - 'dev'
 env:
   MY_DOCKER_REPO: ${{ secrets.DOCKERHUB_ORG }}/filebeat
@@ -46,11 +46,9 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=${{matrix.VERSION}}-${{matrix.CONFIG_FILE}}
-            type=raw,value=latest-${{matrix.CONFIG_FILE}}
             type=raw,value=${{matrix.VERSION}}-${{matrix.CONFIG_FILE}}-${{env.EXT_GIT_REF_SHA1}}
 
       - name: Setup Docker metadata for prod
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/tags'}}
         id: metaprod
         uses: crazy-max/ghaction-docker-meta@v2
         with:
@@ -90,7 +88,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: filebeat/
-          push: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/tags' }}
+          push: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/dev' }}
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -102,7 +100,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: filebeat/
-          push: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/tags' }}
+          push: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/tags' }}
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.metaprod.outputs.tags }}
           labels: ${{ steps.metaprod.outputs.labels }}
