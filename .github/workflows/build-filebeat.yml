@@ -3,7 +3,15 @@ on:
   schedule:
     - cron:  '0 0 * * *'
   workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v*'
   pull_request:
+    branches:
+      - 'main'
+      - 'dev'
 env:
   MY_DOCKER_REPO: ${{ secrets.DOCKERHUB_ORG }}/filebeat
   MY_QUAY_REPO: quay.io/${{ secrets.QUAY_ORG }}/filebeat
@@ -43,7 +51,7 @@ jobs:
 
       - name: Setup Docker metadata for prod
         if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/tags'}}
-        id: meta
+        id: metaprod
         uses: crazy-max/ghaction-docker-meta@v2
         with:
           # list of Docker images to use as base name for tags
@@ -86,6 +94,18 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{matrix.VERSION}}
+            CONFIG_FILE=filebeat_config_${{matrix.CONFIG_FILE}}.yml
+      
+      - name: Build docker container and push it as container if it is part of a pull_request
+        uses: docker/build-push-action@v2
+        with:
+          context: filebeat/
+          push: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' || github.ref == 'refs/tags' }}
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.metaprod.outputs.tags }}
+          labels: ${{ steps.metaprod.outputs.labels }}
           build-args: |
             VERSION=${{matrix.VERSION}}
             CONFIG_FILE=filebeat_config_${{matrix.CONFIG_FILE}}.yml
