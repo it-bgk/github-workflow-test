@@ -44,7 +44,6 @@ jobs:
             prefix=dev-
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=semver,pattern={{version}}
             type=raw,value=${{matrix.VERSION}}-${{matrix.CONFIG_FILE}}
             type=raw,value=${{matrix.VERSION}}-${{matrix.CONFIG_FILE}}-${{env.EXT_GIT_REF_SHA1}}
 
@@ -60,7 +59,7 @@ jobs:
             latest=auto
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=semver,pattern={{version}}
+            type=semver,suffix=-${{matrix.VERSION}}-${{matrix.CONFIG_FILE}},pattern={{version}}
             type=raw,value=${{matrix.VERSION}}-${{matrix.CONFIG_FILE}}
             type=raw,value=latest-${{matrix.CONFIG_FILE}}
             type=raw,value=${{matrix.VERSION}}-${{matrix.CONFIG_FILE}}-${{env.EXT_GIT_REF_SHA1}}
