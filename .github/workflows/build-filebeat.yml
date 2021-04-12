@@ -3,7 +3,7 @@ on:
   schedule:
     - cron:  '0 0 * * *'
   workflow_dispatch:
-  push:
+  pull_request:
 env:
   MY_DOCKER_REPO: ${{ secrets.DOCKERHUB_ORG }}/filebeat
   MY_QUAY_REPO: quay.io/${{ secrets.QUAY_ORG }}/filebeat
@@ -71,23 +71,9 @@ jobs:
           build-args: |
             VERSION=${{matrix.VERSION}}
             CONFIG_FILE=filebeat_config_${{matrix.CONFIG_FILE}}.yml
-
-      # - name: Build
-      #   run: make VERSION=${{ matrix.VERSION }} dev-build-filebeat-${{ matrix.CONFIG_FILE }}
-      
-      # - name: hub.docker.com login
-      #   run: echo ${{ secrets.DOCKER_PASSWORD }}| docker login -u ${{ secrets.DOCKER_USERNAME }}
-      # - name: quay.io login
-      #   run: echo ${{ secrets.QUAY_PASSWORD }}| docker login -u ${{ secrets.QUAY_USERNAME }} quay.io
-      
-      # - name: "Push filbeat:${{ matrix.VERSION }}-${{ matrix.CONFIG_FILE }}"
-      #   run: make VERSION=${{ matrix.VERSION }} dev-push-filebeat-${{ matrix.CONFIG_FILE }}
-      # # - name: "Push filbeat:latest-${{ matrix.CONFIG_FILE }}"
-      # #   run: make VERSION=${{ matrix.VERSION }} dev-push-filebeat-latest-${{ matrix.CONFIG_FILE }}
-  
-  
   
   prod:
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/tags'}}
     strategy:
       matrix:
         VERSION: [7.12.0]
@@ -146,24 +132,3 @@ jobs:
           build-args: |
             VERSION=${{matrix.VERSION}}
             CONFIG_FILE=filebeat_config_${{matrix.CONFIG_FILE}}.yml
-      
-      # - name: Build and push
-      #   uses: docker/build-push-action@v2
-      #   if: ${{ github.ref == 'refs/heads/main' }}
-      #   with:
-      #     context: filebeat/
-      #     push: ${{ github.event_name != 'pull_request' }}
-      #     platforms: linux/amd64,linux/arm64
-      #     push: true
-      #     tags: ${{ steps.meta.outputs.tags }}
-      #     labels: ${{ steps.meta.outputs.labels }}
-      # build-args: |
-      #       VERSION=${{matrix.VERSION}}
-      #       CONFIG_FILE=filebeat_config_${{matrix.CONFIG_FILE}}.yml
-
-      # - name: "Push filbeat:${{ matrix.VERSION }}-${{ matrix.CONFIG_FILE }}"
-      #   run: make VERSION=${{ matrix.VERSION }} push-filebeat-${{ matrix.CONFIG_FILE }}
-      #   if: ${{ github.ref == 'refs/heads/main' }}
-      # - name: "Push filbeat:latest-${{ matrix.CONFIG_FILE }}"
-      #   run: make VERSION=${{ matrix.VERSION }} push-filebeat-latest-${{ matrix.CONFIG_FILE }}
-      #   if: ${{ github.ref == 'refs/heads/main' }}
