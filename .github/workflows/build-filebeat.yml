@@ -60,26 +60,12 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
         if: ${{ github.ref == 'refs/heads/dev' }}
 
-      - name: Build and push
+      - name: Build dev docker container and push it as dev container if it is part of a pull_request
         uses: docker/build-push-action@v2
         with:
           context: filebeat/
           push: ${{ github.event_name == 'pull_request' }}
           platforms: linux/amd64,linux/arm64
-          push: false
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            VERSION=${{matrix.VERSION}}
-            CONFIG_FILE=filebeat_config_${{matrix.CONFIG_FILE}}.yml
-      
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: filebeat/
-          push: ${{ github.event_name != 'pull_request' }}
-          platforms: linux/amd64,linux/arm64
-          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
@@ -149,14 +135,12 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
         if: ${{ github.ref == 'refs/heads/main' }}
 
-      - name: Build and push
+      - name: Build docker container and if it is main push it
         uses: docker/build-push-action@v2
-        #if: ${{ github.ref == 'refs/heads/main' }}
         with:
           context: filebeat/
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.ref == 'refs/heads/main' }}
           platforms: linux/amd64,linux/arm64
-          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
