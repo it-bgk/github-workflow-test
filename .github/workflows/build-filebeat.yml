@@ -1,13 +1,14 @@
 name: Build Filebeat Docker Container
 on: 
+  release:
+    # Only use the types keyword to narrow down the activity types that will trigger your workflow.
+    types: [published, created, edited]
   schedule:
     - cron:  '0 0 * * *'
   workflow_dispatch:
   push:
     branches:
       - 'main'
-    tags:
-      # - 'v*'
   pull_request:
     branches:
       # - 'main'
